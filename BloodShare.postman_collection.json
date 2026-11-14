@@ -1,0 +1,357 @@
+{
+  "info": {
+    "_postman_id": "a9108c43-4876-4d22-9653-bloodshare-api",
+    "name": "BloodShare API",
+    "description": "Postman Collection for BloodShare – Urgent Donation Network API. Contains full CRUD endpoints and alert dispatching workflows.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "createdDonorId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "createdShortageId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "createdAlertId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Zones",
+      "item": [
+        {
+          "name": "GET /zones - List All City Zones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/zones",
+              "host": ["{{baseUrl}}"],
+              "path": ["zones"]
+            },
+            "description": "Lists all available city zones for geographic donor-hospital proximity matching."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Donors (Full CRUD)",
+      "item": [
+        {
+          "name": "POST /donors - Register New Donor (CREATE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('createdDonorId', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Alex Mercer\",\n  \"email\": \"alex.mercer@example.com\",\n  \"blood_type\": \"O-\",\n  \"city_zone_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/donors",
+              "host": ["{{baseUrl}}"],
+              "path": ["donors"]
+            },
+            "description": "Registers a new voluntary donor in a specific city zone."
+          }
+        },
+        {
+          "name": "GET /donors - Search Donors with Filters (READ)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/donors?blood_type=O-&zone_id=1&available=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["donors"],
+              "query": [
+                {
+                  "key": "blood_type",
+                  "value": "O-"
+                },
+                {
+                  "key": "zone_id",
+                  "value": "1"
+                },
+                {
+                  "key": "available",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Retrieves donors filtered by blood type, city zone, and availability status."
+          }
+        },
+        {
+          "name": "GET /donors/:id - Get Single Donor by ID (READ)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/donors/{{createdDonorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["donors", "{{createdDonorId}}"]
+            },
+            "description": "Fetches a single donor's details."
+          }
+        },
+        {
+          "name": "PATCH /donors/:id - Update Availability (UPDATE)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_available\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/donors/{{createdDonorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["donors", "{{createdDonorId}}"]
+            },
+            "description": "Updates donor availability or personal information."
+          }
+        },
+        {
+          "name": "DELETE /donors/:id - Delete Donor (DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/donors/{{createdDonorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["donors", "{{createdDonorId}}"]
+            },
+            "description": "Deletes a donor, completing full CRUD lifecycle."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Inventory & Shortages",
+      "item": [
+        {
+          "name": "POST /inventory/shortages - Create Shortage Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('createdShortageId', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hospital_id\": 1,\n  \"blood_type\": \"O-\",\n  \"units_needed\": 4,\n  \"urgency\": \"CRITICAL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/inventory/shortages",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventory", "shortages"]
+            },
+            "description": "Registers an urgent blood shortage from a hospital."
+          }
+        },
+        {
+          "name": "GET /inventory/shortages - List Shortages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/inventory/shortages?blood_type=O-&urgency=CRITICAL",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventory", "shortages"],
+              "query": [
+                {
+                  "key": "blood_type",
+                  "value": "O-"
+                },
+                {
+                  "key": "urgency",
+                  "value": "CRITICAL"
+                }
+              ]
+            },
+            "description": "Retrieves filtered shortages."
+          }
+        },
+        {
+          "name": "PUT /inventory/:blood_bank_id - Update Blood Stock",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"blood_type\": \"O-\",\n  \"units_available\": 12\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/inventory/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventory", "1"]
+            },
+            "description": "Updates blood stock in a blood bank."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Alerts & Notifications",
+      "item": [
+        {
+          "name": "POST /alerts/send - Dispatch Alerts to Matching Donors",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 202) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.alerts && json.alerts.length > 0) {",
+                  "        pm.collectionVariables.set('createdAlertId', json.alerts[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shortage_request_id\": {{createdShortageId}},\n  \"channel\": \"SMS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alerts/send",
+              "host": ["{{baseUrl}}"],
+              "path": ["alerts", "send"]
+            },
+            "description": "Dispatches instant alerts to donors matching blood type and zone."
+          }
+        },
+        {
+          "name": "GET /alerts/:id - Check Alert Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alerts/{{createdAlertId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["alerts", "{{createdAlertId}}"]
+            },
+            "description": "Fetches status of dispatched alert."
+          }
+        },
+        {
+          "name": "PATCH /alerts/:id - Accept Alert by Donor",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACCEPTED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alerts/{{createdAlertId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["alerts", "{{createdAlertId}}"]
+            },
+            "description": "Donor confirms acceptance of urgent donation request."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Error Handling Demo",
+      "item": [
+        {
+          "name": "POST /donors - 400 Bad Request (Invalid Blood Type)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Invalid Donor\",\n  \"email\": \"invalid@example.com\",\n  \"blood_type\": \"XYZ+\",\n  \"city_zone_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/donors",
+              "host": ["{{baseUrl}}"],
+              "path": ["donors"]
+            },
+            "description": "Demonstrates the standardized JSON error schema required by the specification."
+          }
+        }
+      ]
+    }
+  ]
+}
