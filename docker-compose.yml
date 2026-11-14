@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:15.3-alpine
+    container_name: bloodshare_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bloodshare_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bloodshare_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-bloodshare_db}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - bloodshare_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bloodshare_user} -d ${POSTGRES_DB:-bloodshare_db}"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bloodshare_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-bloodshare_user}:${POSTGRES_PASSWORD:-bloodshare_pass}@db:5432/${POSTGRES_DB:-bloodshare_db}
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  bloodshare_pgdata:

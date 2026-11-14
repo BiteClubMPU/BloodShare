@@ -20,3 +20,7 @@ htmlcov/
 .vscode/
 .idea/
 *.swp
+
+# Databases
+*.db
+*.sqlite
