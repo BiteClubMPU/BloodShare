@@ -30,15 +30,15 @@ def create_db_engine(url: str):
             eng = create_engine(url, pool_pre_ping=True)
             with eng.connect():
                 pass
-            print(f"[BloodShare] Connected successfully to PostgreSQL at {url.split('@')[-1]}")
+            logger.info("Connected successfully to PostgreSQL at %s", url.split("@")[-1])
             return eng
         except Exception as exc:
             last_err = exc
-            print(f"[BloodShare] PostgreSQL connection attempt {attempt}/5 failed ({exc}). Retrying in 2s...")
+            logger.warning("PostgreSQL connection attempt %d/5 failed (%s). Retrying in 2s...", attempt, exc)
             time.sleep(2)
 
     fallback_url = "sqlite:///./bloodshare.db"
-    print(f"[BloodShare] Warning: Could not reach PostgreSQL ({last_err}). Falling back to SQLite ({fallback_url})")
+    logger.warning("Could not reach PostgreSQL (%s). Falling back to SQLite (%s)", last_err, fallback_url)
     return create_engine(fallback_url, connect_args={"check_same_thread": False})
 
 
