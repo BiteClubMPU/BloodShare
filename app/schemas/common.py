@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from typing import Literal
 from pydantic import BaseModel, Field
 
@@ -16,10 +15,10 @@ AlertStatus = Literal["SENT", "ACCEPTED", "DECLINED"]
 
 
 class ErrorResponse(BaseModel):
-    status: int = Field(..., example=400)
-    error: str = Field(..., example="Bad Request")
+    status: int = Field(..., json_schema_extra={"example": 400})
+    error: str = Field(..., json_schema_extra={"example": "Bad Request"})
     message: str = Field(
         ...,
-        example="Field 'blood_type' must be one of: A+, A-, B+, B-, AB+, AB-, O+, O-.",
+        json_schema_extra={"example": "Field 'blood_type' must be one of: A+, A-, B+, B-, AB+, AB-, O+, O-."},
     )
-    timestamp: str = Field(..., example="2026-10-29T14:02:00Z")
+    timestamp: str = Field(..., json_schema_extra={"example": "2026-10-29T14:02:00Z"})

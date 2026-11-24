@@ -13,16 +13,15 @@ Hospitals and blood banks lack real-time visibility into blood shortages, so pat
 To run this application locally, ensure your machine meets the minimum version constraints outlined below:
 
 *   **Language & Runtime:** Python 3.11.5
-*   **Web Framework:** FastAPI v0.100.0
+*   **Web Framework:** FastAPI v0.115.0
 *   **Database:** PostgreSQL v15.3
 *   **Production Dependencies:**
-    *   `fastapi` (^0.100.0) - Handles HTTP routing and automatic API documentation.
-    *   `uvicorn` (^0.23.0) - Runs the ASGI web server.
-    *   `sqlalchemy` (^2.0.0) - Maps Python models to database tables.
-    *   `psycopg2-binary` (^2.9.6) - Connects the application to the PostgreSQL database.
-    *   `alembic` (^1.11.0) - Manages database schema migrations.
-    *   `pydantic` (^2.0.0) - Validates request payloads (for example, blood types).
-    *   `python-dotenv` (^1.0.0) - Loads environment variables from the `.env` file.
+    *   `fastapi` (0.115.0) - Handles HTTP routing and automatic API documentation.
+    *   `uvicorn` (0.32.0) - Runs the ASGI web server.
+    *   `sqlalchemy` (2.0.36) - Maps Python models to database tables.
+    *   `psycopg2-binary` (2.9.10) - Connects the application to the PostgreSQL database.
+    *   `pydantic` (2.10.0) - Validates request payloads (for example, blood types).
+    *   `python-dotenv` (1.0.1) - Loads environment variables from the `.env` file.
 
 ---
 
@@ -33,7 +32,7 @@ Follow these precise steps to provision your local development environment:
 1. **Clone** the remote repository from GitHub:
    ```bash
    git clone https://github.com/BiteClubMPU/BloodShare.git
-   cd bloodshare
+   cd BloodShare
    ```
 
 2. **Create** and **activate** a virtual environment:
@@ -53,9 +52,9 @@ Follow these precise steps to provision your local development environment:
    ```
    *(Open the newly created `.env` file and insert your local database credentials).*
 
-5. **Initialize** the database schema migrations:
+5. **Start PostgreSQL** (tables and demo data are created automatically on first startup):
    ```bash
-   alembic upgrade head
+   docker compose up -d db
    ```
 
 6. **Start** the local development server:
@@ -84,6 +83,10 @@ All request payloads and response bodies must strictly communicate via valid JSO
 | `POST` | `/donors` | `{"full_name": "string", "email": "string", "blood_type": "string", "city_zone_id": "number"}` | `201 Created` | Registers a new donor. |
 | `GET` | `/donors` | None (optional query: `blood_type`, `zone_id`, `available`) | `200 OK` | Searches registered donors by blood type and zone. |
 | `PATCH` | `/donors/{id}` | `{"is_available": "boolean"}` | `200 OK` | Updates donor data or availability. |
+| `GET` | `/donors/{id}` | None | `200 OK` | Retrieves a single donor. |
+| `DELETE` | `/donors/{id}` | None | `200 OK` | Removes a donor. |
+| `GET` | `/alerts` | None (optional query: `shortage_id`, `donor_id`, `status`) | `200 OK` | Lists dispatched alerts. |
+| `GET` | `/inventory/{blood_bank_id}` | None | `200 OK` | Retrieves the stock of a blood bank. |
 | `GET` | `/zones` | None | `200 OK` | Lists all city zones. |
 
 ### 🛑 Standard Error Handling Response
